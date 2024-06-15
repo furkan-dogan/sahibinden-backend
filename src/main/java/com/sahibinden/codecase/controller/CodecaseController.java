@@ -15,14 +15,17 @@ import java.util.Optional;
 @RequestMapping("/dashboard/classifieds")
 public class CodecaseController {
 
-    @Autowired
-    private CodecaseRepository codecaseRepository;
+    private final CodecaseRepository codecaseRepository;
+    private final BadWordUtil badWordUtil;
 
     @Autowired
-    private BadWordUtil badWordUtil;
+    public CodecaseController(CodecaseRepository codecaseRepository, BadWordUtil badWordUtil) {
+        this.codecaseRepository = codecaseRepository;
+        this.badWordUtil = badWordUtil;
+    }
 
     @GetMapping("/getAllClientAdvert")
-    public List<CodecaseModel> getAll(){
+    public List<CodecaseModel> getAllClientAdvert(){
         return codecaseRepository.findAll();
     }
 
@@ -30,8 +33,17 @@ public class CodecaseController {
     public String saveClientAdvert(@RequestBody CodecaseModel codecaseModel){
 
         String title = codecaseModel.getTitle();
-        if (!isValidTitle(title)) {
-            return "Başlık geçerli değil.";
+        if (title == null || title.length() < 10 || title.length() > 50) {
+            return "Başlık 10 ila 50 karakter sayısı arasında olmalıdır.";
+        }
+
+        char firstChar = title.charAt(0);
+        if (!Character.isLetterOrDigit(firstChar)) {
+            return "Başlık harf veya rakam ile başlamalıdır.";
+        }
+
+        if (badWordUtil.containsBadWord(title)) {
+            return "İlan girişi yasaklı kelimeden dolayı engellendi.";
         }
 
         String description = codecaseModel.getDescription();
@@ -56,22 +68,6 @@ public class CodecaseController {
         }
         codecaseRepository.save(codecaseModel);
         return("İlan kaydedildi !");
-    }
-
-    private boolean isValidTitle(String title) {
-        if (title == null || title.length() < 10 || title.length() > 50) {
-            return false;
-        }
-
-        char firstChar = title.charAt(0);
-        if (!Character.isLetterOrDigit(firstChar)) {
-            return false;
-        }
-
-        if (badWordUtil.containsBadWord(title)) {
-            return false;
-        }
-        return true;
     }
 
     @DeleteMapping("/deleteClientAdvert/{id}")

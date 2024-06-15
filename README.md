@@ -1,5 +1,7 @@
 # sahibinden.com
 
+### Postman Dökümantasyonu: https://documenter.getpostman.com/view/29702154/2sA3XQhh63
+
 ### İlan API
 Kullanıcıların ilan girebilecekleri ve ilanlarını diledikleri zaman yayınlayıp, diledikleri zaman yayından kaldırabilecekleri 
 ve ilana ait birçok işlevi uygulayabilecekleri POC amaçlı yeni bir API projesi ekip olarak geliştirilmek isteniyor. 
