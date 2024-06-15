@@ -3,6 +3,7 @@ package com.sahibinden.codecase.controller;
 import com.sahibinden.codecase.dto.StatisticsResponse;
 import com.sahibinden.codecase.model.CodecaseModel;
 import com.sahibinden.codecase.repository.CodecaseRepository;
+import com.sahibinden.codecase.util.BadWordUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,9 @@ public class CodecaseController {
     @Autowired
     private CodecaseRepository codecaseRepository;
 
+    @Autowired
+    private BadWordUtil badWordUtil;
+
     @GetMapping("/getAllClientAdvert")
     public List<CodecaseModel> getAll(){
         return codecaseRepository.findAll();
@@ -24,6 +28,16 @@ public class CodecaseController {
 
     @PostMapping("/saveClientAdvert")
     public String saveClientAdvert(@RequestBody CodecaseModel codecaseModel){
+
+        String title = codecaseModel.getTitle();
+        if (!isValidTitle(title)) {
+            return "Başlık geçerli değil.";
+        }
+
+        String description = codecaseModel.getDescription();
+        if (description.length() < 20 || description.length() > 200) {
+            return "Açıklama 20 ila 200 karakter arasında olmalıdır.";
+        }
         List<CodecaseModel> existingAdverts = codecaseRepository.findByCategoryAndTitleAndDescription(
                 codecaseModel.getCategory(),
                 codecaseModel.getTitle(),
@@ -42,6 +56,22 @@ public class CodecaseController {
         }
         codecaseRepository.save(codecaseModel);
         return("İlan kaydedildi !");
+    }
+
+    private boolean isValidTitle(String title) {
+        if (title == null || title.length() < 10 || title.length() > 50) {
+            return false;
+        }
+
+        char firstChar = title.charAt(0);
+        if (!Character.isLetterOrDigit(firstChar)) {
+            return false;
+        }
+
+        if (badWordUtil.containsBadWord(title)) {
+            return false;
+        }
+        return true;
     }
 
     @DeleteMapping("/deleteClientAdvert/{id}")
