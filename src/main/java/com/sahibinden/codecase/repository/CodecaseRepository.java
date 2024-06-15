@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface CodecaseRepository extends JpaRepository<CodecaseModel, Integer> {
     List<CodecaseModel> findByCategoryAndTitleAndDescription(String category, String title, String description);
+    long countByStatus(String status);
 
 }

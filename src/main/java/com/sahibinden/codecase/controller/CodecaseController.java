@@ -1,5 +1,6 @@
 package com.sahibinden.codecase.controller;
 
+import com.sahibinden.codecase.dto.StatisticsResponse;
 import com.sahibinden.codecase.model.CodecaseModel;
 import com.sahibinden.codecase.repository.CodecaseRepository;
 
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/sahibinden")
+@RequestMapping("/dashboard/classifieds")
 public class CodecaseController {
 
     @Autowired
@@ -39,9 +40,8 @@ public class CodecaseController {
                 codecaseModel.setStatus("Aktif");
             }
         }
-
         codecaseRepository.save(codecaseModel);
-        return("customer advert saved !");
+        return("İlan kaydedildi !");
     }
 
     @DeleteMapping("/deleteClientAdvert/{id}")
@@ -49,34 +49,61 @@ public class CodecaseController {
         Optional<CodecaseModel> optionalCodecaseModel = codecaseRepository.findById(id);
         if (optionalCodecaseModel.isPresent()) {
             codecaseRepository.deleteById(id);
-            return "ClientAdvert deleted successfully.";
+            return "İlan başarıyla silindi.";
         } else {
-            return "ClientAdvert not found.";
+            return "İlan bulunamadı.";
         }
     }
 
-    @PutMapping("/updateClientAdvert/{id}")
-    public String updateClientAdvert(@PathVariable int id, @RequestBody CodecaseModel updatedCodecaseModel){
+    @PutMapping("/updateClientAdvertStatus/{id}")
+    public String updateClientAdvertStatus(@PathVariable int id) {
         Optional<CodecaseModel> optionalExistingAdvert = codecaseRepository.findById(id);
         if (optionalExistingAdvert.isPresent()) {
             CodecaseModel existingAdvert = optionalExistingAdvert.get();
 
             if ("Onay Bekliyor".equals(existingAdvert.getStatus())) {
-                updatedCodecaseModel.setStatus("Aktif");
+                existingAdvert.setStatus("Aktif");
+                codecaseRepository.save(existingAdvert);
+                return "İlan durumu Aktif olarak değiştirildi.";
             }
 
             if ("Mükerrer".equals(existingAdvert.getStatus())) {
-                return "Cannot update a duplicate advert.";
+                return "Birden fazla girilmiş bir ilanı güncelleyemezsin.";
             }
 
-            updatedCodecaseModel.setID(id);
-            codecaseRepository.save(updatedCodecaseModel);
-            return "ClientAdvert updated.";
+            return "İlan durumu 'Onay Bekliyor' durumunda değil, güncelleme yapılmadı.";
         } else {
-            return "ClientAdvert not found.";
+            return "İlan bulunamadı.";
         }
     }
 
+    @PutMapping("/deactivateClientAdvert/{id}")
+    public String deactivateClientAdvert(@PathVariable int id) {
+        Optional<CodecaseModel> optionalExistingAdvert = codecaseRepository.findById(id);
+        if (optionalExistingAdvert.isPresent()) {
+            CodecaseModel existingAdvert = optionalExistingAdvert.get();
+
+            if ("Aktif".equals(existingAdvert.getStatus()) || "Onay Bekliyor".equals(existingAdvert.getStatus())) {
+                existingAdvert.setStatus("Deaktif");
+                codecaseRepository.save(existingAdvert);
+                return "İlan durumu Deaktif olarak değiştirildi.";
+            }
+
+            return "İlan durumu 'Aktif' ya da 'Onay Bekliyor' durumunda değil, güncelleme yapılmadı.";
+        } else {
+            return "İlan bulunamadı.";
+        }
+    }
+
+    @GetMapping("/statistics")
+    public StatisticsResponse getStatistics() {
+        long activeCount = codecaseRepository.countByStatus("Aktif");
+        long inactiveCount = codecaseRepository.countByStatus("Deaktif");
+        long pendingApprovalCount = codecaseRepository.countByStatus("Onay Bekliyor");
+        long duplicateCount = codecaseRepository.countByStatus("Mükerrer");
+
+        return new StatisticsResponse(activeCount, inactiveCount, pendingApprovalCount, duplicateCount);
+    }
 
 
 }
