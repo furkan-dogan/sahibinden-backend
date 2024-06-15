@@ -16,15 +16,32 @@ public class CodecaseController {
     @Autowired
     private CodecaseRepository codecaseRepository;
 
-    @PostMapping("/saveClientAdvert")
-    public String saveClientAdvert(@RequestBody CodecaseModel codecaseModel){
-        codecaseRepository.save(codecaseModel);
-        return("ClientAdvertSave..");
-    }
-
     @GetMapping("/getAllClientAdvert")
     public List<CodecaseModel> getAll(){
         return codecaseRepository.findAll();
+    }
+
+    @PostMapping("/saveClientAdvert")
+    public String saveClientAdvert(@RequestBody CodecaseModel codecaseModel){
+        List<CodecaseModel> existingAdverts = codecaseRepository.findByCategoryAndTitleAndDescription(
+                codecaseModel.getCategory(),
+                codecaseModel.getTitle(),
+                codecaseModel.getDescription()
+        );
+
+        if (!existingAdverts.isEmpty()) {
+            codecaseModel.setStatus("Mükerrer");
+        } else {
+            String category = codecaseModel.getCategory();
+            if (category.equals("Emlak") || category.equals("Vasıta") || category.equals("Diğer")) {
+                codecaseModel.setStatus("Onay Bekliyor");
+            } else {
+                codecaseModel.setStatus("Aktif");
+            }
+        }
+
+        codecaseRepository.save(codecaseModel);
+        return("customer advert saved !");
     }
 
     @DeleteMapping("/deleteClientAdvert/{id}")
@@ -37,5 +54,29 @@ public class CodecaseController {
             return "ClientAdvert not found.";
         }
     }
+
+    @PutMapping("/updateClientAdvert/{id}")
+    public String updateClientAdvert(@PathVariable int id, @RequestBody CodecaseModel updatedCodecaseModel){
+        Optional<CodecaseModel> optionalExistingAdvert = codecaseRepository.findById(id);
+        if (optionalExistingAdvert.isPresent()) {
+            CodecaseModel existingAdvert = optionalExistingAdvert.get();
+
+            if ("Onay Bekliyor".equals(existingAdvert.getStatus())) {
+                updatedCodecaseModel.setStatus("Aktif");
+            }
+
+            if ("Mükerrer".equals(existingAdvert.getStatus())) {
+                return "Cannot update a duplicate advert.";
+            }
+
+            updatedCodecaseModel.setID(id);
+            codecaseRepository.save(updatedCodecaseModel);
+            return "ClientAdvert updated.";
+        } else {
+            return "ClientAdvert not found.";
+        }
+    }
+
+
 
 }

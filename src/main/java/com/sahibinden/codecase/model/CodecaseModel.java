@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class CodecaseModel {
     @Id
     @GeneratedValue
-    private int id;
+    private int ID;
     private String title;
     private String description;
     private String category;
