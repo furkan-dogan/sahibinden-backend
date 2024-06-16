@@ -1,8 +1,12 @@
-package com.sahibinden.codecase.Repository;
+package com.sahibinden.codecase.repository;
 
 import com.sahibinden.codecase.model.CodecaseModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface CodecaseRepository extends JpaRepository<CodecaseModel, Long> {
+import java.util.List;
+
+public interface CodecaseRepository extends JpaRepository<CodecaseModel, Integer> {
+    List<CodecaseModel> findByCategoryAndTitleAndDescription(String category, String title, String description);
+    long countByStatus(String status);
 
 }
