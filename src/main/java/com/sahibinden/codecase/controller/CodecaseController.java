@@ -14,13 +14,13 @@ import java.util.List;
 @RequestMapping("/dashboard/classifieds")
 public class CodecaseController {
 
-    private final CodecaseRepository codecaseRepository;
-    private final BadWordUtil badWordUtil;
-
     private static final String STATUS_APPROVAL_PENDING = "Onay Bekliyor";
     private static final String STATUS_ACTIVE = "Aktif";
     private static final String STATUS_INACTIVE = "Deaktif";
     private static final String STATUS_DUPLICATE = "Mükerrer";
+
+    private final CodecaseRepository codecaseRepository;
+    private final BadWordUtil badWordUtil;
 
     @Autowired
     public CodecaseController(CodecaseRepository codecaseRepository, BadWordUtil badWordUtil) {
