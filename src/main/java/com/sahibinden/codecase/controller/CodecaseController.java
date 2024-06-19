@@ -2,12 +2,15 @@ package com.sahibinden.codecase.controller;
 
 import com.sahibinden.codecase.dto.StatisticsResponse;
 import com.sahibinden.codecase.model.CodecaseModel;
+import com.sahibinden.codecase.model.StatusChange;
 import com.sahibinden.codecase.repository.CodecaseRepository;
+import com.sahibinden.codecase.repository.StatusChangeRepository;
 import com.sahibinden.codecase.util.BadWordUtil;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -21,11 +24,13 @@ public class CodecaseController {
 
     private final CodecaseRepository codecaseRepository;
     private final BadWordUtil badWordUtil;
+    private final StatusChangeRepository statusChangeRepository;
 
     @Autowired
-    public CodecaseController(CodecaseRepository codecaseRepository, BadWordUtil badWordUtil) {
+    public CodecaseController(CodecaseRepository codecaseRepository, BadWordUtil badWordUtil, StatusChangeRepository statusChangeRepository) {
         this.codecaseRepository = codecaseRepository;
         this.badWordUtil = badWordUtil;
+        this.statusChangeRepository = statusChangeRepository;
     }
 
     @GetMapping("/getAllClientAdvert")
@@ -50,7 +55,8 @@ public class CodecaseController {
             codecaseModel.setStatus(determineStatusByCategory(codecaseModel.getCategory()));
         }
 
-        codecaseRepository.save(codecaseModel);
+        CodecaseModel savedAdvert = codecaseRepository.save(codecaseModel);
+        saveStatusChange(savedAdvert.getID(), savedAdvert.getStatus());
         return "İlan kaydedildi !";
     }
 
@@ -67,14 +73,22 @@ public class CodecaseController {
     @PutMapping("/updateClientAdvertStatus/{id}")
     public String updateClientAdvertStatus(@PathVariable int id) {
         return codecaseRepository.findById(id)
-                .map(this::updateStatusToActive)
+                .map(advert -> {
+                    String result = updateStatusToActive(advert);
+                    saveStatusChange(advert.getID(), advert.getStatus());
+                    return result;
+                })
                 .orElse("İlan bulunamadı.");
     }
 
     @PutMapping("/deactivateClientAdvert/{id}")
     public String deactivateClientAdvert(@PathVariable int id) {
         return codecaseRepository.findById(id)
-                .map(this::deactivateAdvert)
+                .map(advert -> {
+                    String result = deactivateAdvert(advert);
+                    saveStatusChange(advert.getID(), advert.getStatus());
+                    return result;
+                })
                 .orElse("İlan bulunamadı.");
     }
 
@@ -86,6 +100,11 @@ public class CodecaseController {
         long duplicateCount = codecaseRepository.countByStatus(STATUS_DUPLICATE);
 
         return new StatisticsResponse(activeCount, inactiveCount, pendingApprovalCount, duplicateCount);
+    }
+
+    @GetMapping("/getStatusChanges/{id}")
+    public List<StatusChange> getStatusChanges(@PathVariable int id) {
+        return statusChangeRepository.findByAdvertIdOrderByChangeTimeAsc(id);
     }
 
     private String validateAdvert(CodecaseModel codecaseModel) {
@@ -140,5 +159,21 @@ public class CodecaseController {
         }
 
         return "İlan durumu 'Aktif' ya da 'Onay Bekliyor' durumunda değil, güncelleme yapılmadı.";
+    }
+
+    private void saveStatusChange(int advertId, String status) {
+        List<StatusChange> statusChanges = statusChangeRepository.findByAdvertIdOrderByChangeTimeAsc(advertId);
+        if (!statusChanges.isEmpty()) {
+            StatusChange lastStatusChange = statusChanges.get(statusChanges.size() - 1);
+            if (lastStatusChange.getStatus().equals(status)) {
+                return;
+            }
+        }
+
+        StatusChange statusChange = new StatusChange();
+        statusChange.setAdvertId(advertId);
+        statusChange.setStatus(status);
+        statusChange.setChangeTime(LocalDateTime.now());
+        statusChangeRepository.save(statusChange);
     }
 }

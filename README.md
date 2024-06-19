@@ -49,7 +49,7 @@ Bir üstteki komut ise, dockerimage adlı Docker image'ından bir container baş
 [✓] Kayıtlı tüm ilanların toplamda hangi durumlarda olduğunun istatistiksel -Aktif: 151, Deaktif: 71 gibi- olarak listelenmesi.
 `GET /dashboard/classifieds/statistics`
 
-[ ] Bir ilana ait zamanla oluşan tüm durum değişikliklerini listeleme (**BONUS**)
+[✓] Bir ilana ait zamanla oluşan tüm durum değişikliklerini listeleme (**BONUS**)
 
 #### Testler
 [✓] Unit Testler (Kapsam ve oranı geliştiricinin inisiyatifindedir)
@@ -59,6 +59,6 @@ Bir üstteki komut ise, dockerimage adlı Docker image'ından bir container baş
 
 [ ] Çalışma süresi 5 milisaniyeden fazla süren isteklerin her defasında loglanması
 
-[✓] Uygulamanın containerize edilmesi
+[✓] Uygulamanın containerize edilmesi (Docker)
 
-[ ] Enterasyon Testleri
+[ ] Entegrasyon Testleri

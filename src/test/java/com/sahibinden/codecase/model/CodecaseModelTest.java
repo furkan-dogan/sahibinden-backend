@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class CodecaseModelTest {
 
@@ -29,6 +30,21 @@ public class CodecaseModelTest {
     }
 
     @Test
+    public void testSetters() {
+        codecaseModel.setID(2);
+        codecaseModel.setTitle("Yeni Başlık");
+        codecaseModel.setDescription("Yeni Açıklama");
+        codecaseModel.setCategory("Vasıta");
+        codecaseModel.setStatus("Aktif");
+
+        assertEquals(2, codecaseModel.getID());
+        assertEquals("Yeni Başlık", codecaseModel.getTitle());
+        assertEquals("Yeni Açıklama", codecaseModel.getDescription());
+        assertEquals("Vasıta", codecaseModel.getCategory());
+        assertEquals("Aktif", codecaseModel.getStatus());
+    }
+
+    @Test
     public void testToString() {
         String expectedToString = "CodecaseModel(ID=1, title=İlan Başlığı, description=İlan Açıklaması, category=Emlak, status=Onay Bekliyor)";
         assertEquals(expectedToString, codecaseModel.toString());
@@ -45,5 +61,19 @@ public class CodecaseModelTest {
 
         assertEquals(codecaseModel, anotherModel);
         assertEquals(codecaseModel.hashCode(), anotherModel.hashCode());
+
+        anotherModel.setID(2);
+        assertNotEquals(codecaseModel, anotherModel);
+        assertNotEquals(codecaseModel.hashCode(), anotherModel.hashCode());
+    }
+
+    @Test
+    public void testAllArgsConstructor() {
+        CodecaseModel anotherModel = new CodecaseModel(2, "Başlık", "Açıklama", "Kategori", "Durum");
+        assertEquals(2, anotherModel.getID());
+        assertEquals("Başlık", anotherModel.getTitle());
+        assertEquals("Açıklama", anotherModel.getDescription());
+        assertEquals("Kategori", anotherModel.getCategory());
+        assertEquals("Durum", anotherModel.getStatus());
     }
 }

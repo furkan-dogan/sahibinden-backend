@@ -3,7 +3,9 @@ package com.sahibinden.codecase.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sahibinden.codecase.dto.StatisticsResponse;
 import com.sahibinden.codecase.model.CodecaseModel;
+import com.sahibinden.codecase.model.StatusChange;
 import com.sahibinden.codecase.repository.CodecaseRepository;
+import com.sahibinden.codecase.repository.StatusChangeRepository;
 import com.sahibinden.codecase.util.BadWordUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,16 +15,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CodecaseController.class)
 public class CodecaseControllerTest {
@@ -36,13 +39,24 @@ public class CodecaseControllerTest {
     @MockBean
     private BadWordUtil badWordUtil;
 
+    @MockBean
+    private StatusChangeRepository statusChangeRepository;
+
+
     @Autowired
     private ObjectMapper objectMapper;
 
     private List<CodecaseModel> codecaseModels;
+    private List<StatusChange> statusChanges;
+
 
     @BeforeEach
     void setUp() {
+        statusChanges = Arrays.asList(
+                new StatusChange(1, 1, "Aktif", LocalDateTime.now()),
+                new StatusChange(2, 1, "Deaktif", LocalDateTime.now().plusHours(1))
+        );
+
         codecaseModels = Arrays.asList(
                 new CodecaseModel(1, "Title1", "Description1", "Emlak", "Aktif"),
                 new CodecaseModel(2, "Title2", "Description2", "Vasıta", "Deaktif"),
@@ -245,6 +259,21 @@ public class CodecaseControllerTest {
                 .andExpect(jsonPath("$.inactiveCount").value(2))
                 .andExpect(jsonPath("$.pendingApprovalCount").value(1))
                 .andExpect(jsonPath("$.duplicateCount").value(1));
+    }
+
+    @Test
+    void getStatusChangesTest() throws Exception {
+        int advertId = 1;
+
+        when(statusChangeRepository.findByAdvertIdOrderByChangeTimeAsc(anyInt())).thenReturn(statusChanges);
+
+        mockMvc.perform(get("/dashboard/classifieds/getStatusChanges/{id}", advertId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].advertId").value(1))
+                .andExpect(jsonPath("$[0].status").value("Aktif"))
+                .andExpect(jsonPath("$[1].advertId").value(1))
+                .andExpect(jsonPath("$[1].status").value("Deaktif"));
     }
 
 }
