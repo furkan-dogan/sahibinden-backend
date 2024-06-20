@@ -65,7 +65,6 @@ public class AdvertIntegrationTest {
 
     @Test
     void testSaveAndGetAllClientAdverts() throws Exception {
-        // Save test
         AdvertModel newAdvert = new AdvertModel();
         newAdvert.setTitle("ValidTitle");
         newAdvert.setDescription("Valid description with sufficient length");
@@ -80,7 +79,6 @@ public class AdvertIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value("İlan kaydedildi !"));
 
-        // Get all test
         when(advertRepository.findAll()).thenReturn(advertModels);
 
         mockMvc.perform(get("/dashboard/classifieds/getAllClientAdvert"))

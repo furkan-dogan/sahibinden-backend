@@ -30,28 +30,6 @@ public class AdvertService {
         this.statusChangeRepository = statusChangeRepository;
     }
 
-    public String validateAdvert(AdvertModel advertModel) {
-        String title = advertModel.getTitle();
-        if (title == null || title.length() < 10 || title.length() > 50) {
-            return "Başlık 10 ila 50 karakter sayısı arasında olmalıdır.";
-        }
-
-        if (!Character.isLetterOrDigit(title.charAt(0))) {
-            return "Başlık harf veya rakam ile başlamalıdır.";
-        }
-
-        if (badWordUtil.containsBadWord(title)) {
-            return "İlan girişi yasaklı kelimeden dolayı engellendi.";
-        }
-
-        String description = advertModel.getDescription();
-        if (description.length() < 20 || description.length() > 200) {
-            return "Açıklama 20 ila 200 karakter arasında olmalıdır.";
-        }
-
-        return null;
-    }
-
     public String determineStatusByCategory(String category) {
         if ("Emlak".equals(category) || "Vasıta".equals(category) || "Diğer".equals(category)) {
             return STATUS_APPROVAL_PENDING;

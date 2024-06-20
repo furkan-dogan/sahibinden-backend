@@ -1,79 +1,91 @@
 package com.sahibinden.codecase.model;
 
-import org.junit.jupiter.api.BeforeEach;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import jakarta.validation.ConstraintViolation;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import java.util.Set;
 
 public class AdvertModelTest {
 
-    private AdvertModel advertModel;
+    private static Validator validator;
 
-    @BeforeEach
-    public void setUp() {
-        advertModel = new AdvertModel();
-        advertModel.setID(1);
-        advertModel.setTitle("İlan Başlığı");
-        advertModel.setDescription("İlan Açıklaması");
-        advertModel.setCategory("Emlak");
-        advertModel.setStatus("Onay Bekliyor");
+    @BeforeAll
+    public static void setUp() {
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            validator = factory.getValidator();
+        }
     }
 
     @Test
-    public void testGetters() {
-        assertEquals(1, advertModel.getID());
-        assertEquals("İlan Başlığı", advertModel.getTitle());
-        assertEquals("İlan Açıklaması", advertModel.getDescription());
-        assertEquals("Emlak", advertModel.getCategory());
-        assertEquals("Onay Bekliyor", advertModel.getStatus());
+    public void testValidAdvertModel() {
+        AdvertModel advert = new AdvertModel();
+        advert.setTitle("Valid Title 123");
+        advert.setDescription("This is a valid description with enough length.");
+        advert.setCategory("Emlak");
+        advert.setStatus("Active");
+
+        Set<ConstraintViolation<AdvertModel>> violations = validator.validate(advert);
+        assertTrue(violations.isEmpty());
     }
 
     @Test
-    public void testSetters() {
-        advertModel.setID(2);
-        advertModel.setTitle("Yeni Başlık");
-        advertModel.setDescription("Yeni Açıklama");
-        advertModel.setCategory("Vasıta");
-        advertModel.setStatus("Aktif");
+    public void testInvalidTitleTooShort() {
+        AdvertModel advert = new AdvertModel();
+        advert.setTitle("Short");
+        advert.setDescription("This is a valid description with enough length.");
+        advert.setCategory("Emlak");
+        advert.setStatus("Active");
 
-        assertEquals(2, advertModel.getID());
-        assertEquals("Yeni Başlık", advertModel.getTitle());
-        assertEquals("Yeni Açıklama", advertModel.getDescription());
-        assertEquals("Vasıta", advertModel.getCategory());
-        assertEquals("Aktif", advertModel.getStatus());
+        Set<ConstraintViolation<AdvertModel>> violations = validator.validate(advert);
+        assertFalse(violations.isEmpty());
+        assertEquals(1, violations.size());
+        assertEquals("İlan başlığı en az 10, en fazla 50 karakter olmalıdır.\n", violations.iterator().next().getMessage());
     }
 
     @Test
-    public void testToString() {
-        String expectedToString = "AdvertModel(ID=1, title=İlan Başlığı, description=İlan Açıklaması, category=Emlak, status=Onay Bekliyor)";
-        assertEquals(expectedToString, advertModel.toString());
+    public void testInvalidTitleSpecialCharacter() {
+        AdvertModel advert = new AdvertModel();
+        advert.setTitle("@InvalidTitle");
+        advert.setDescription("This is a valid description with enough length.");
+        advert.setCategory("Emlak");
+        advert.setStatus("Active");
+
+        Set<ConstraintViolation<AdvertModel>> violations = validator.validate(advert);
+        assertFalse(violations.isEmpty());
+        assertEquals(1, violations.size());
+        assertEquals("İlan başlığı harf veya rakam ile başlamalıdır.\n", violations.iterator().next().getMessage());
     }
 
     @Test
-    public void testEqualsAndHashCode() {
-        AdvertModel anotherModel = new AdvertModel();
-        anotherModel.setID(1);
-        anotherModel.setTitle("İlan Başlığı");
-        anotherModel.setDescription("İlan Açıklaması");
-        anotherModel.setCategory("Emlak");
-        anotherModel.setStatus("Onay Bekliyor");
+    public void testInvalidDescriptionTooShort() {
+        AdvertModel advert = new AdvertModel();
+        advert.setTitle("Valid Title 123");
+        advert.setDescription("Too short.");
+        advert.setCategory("Emlak");
+        advert.setStatus("Active");
 
-        assertEquals(advertModel, anotherModel);
-        assertEquals(advertModel.hashCode(), anotherModel.hashCode());
-
-        anotherModel.setID(2);
-        assertNotEquals(advertModel, anotherModel);
-        assertNotEquals(advertModel.hashCode(), anotherModel.hashCode());
+        Set<ConstraintViolation<AdvertModel>> violations = validator.validate(advert);
+        assertFalse(violations.isEmpty());
+        assertEquals(1, violations.size());
+        assertEquals("İlan detay açıklaması en az 20, en fazla 200 karakter olmalıdır.", violations.iterator().next().getMessage());
     }
 
     @Test
-    public void testAllArgsConstructor() {
-        AdvertModel anotherModel = new AdvertModel(2, "Başlık", "Açıklama", "Kategori", "Durum");
-        assertEquals(2, anotherModel.getID());
-        assertEquals("Başlık", anotherModel.getTitle());
-        assertEquals("Açıklama", anotherModel.getDescription());
-        assertEquals("Kategori", anotherModel.getCategory());
-        assertEquals("Durum", anotherModel.getStatus());
+    public void testInvalidCategory() {
+        AdvertModel advert = new AdvertModel();
+        advert.setTitle("Valid Title 123");
+        advert.setDescription("This is a valid description with enough length.");
+        advert.setCategory("InvalidCategory");
+        advert.setStatus("Active");
+
+        Set<ConstraintViolation<AdvertModel>> violations = validator.validate(advert);
+        assertFalse(violations.isEmpty());
+        assertEquals(1, violations.size());
+        assertEquals("Geçersiz ilan kategorisi.", violations.iterator().next().getMessage());
     }
 }

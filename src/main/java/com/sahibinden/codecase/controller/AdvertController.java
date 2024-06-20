@@ -7,7 +7,11 @@ import com.sahibinden.codecase.repository.AdvertRepository;
 import com.sahibinden.codecase.repository.StatusChangeRepository;
 import com.sahibinden.codecase.service.AdvertService;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,10 +37,11 @@ public class AdvertController {
     }
 
     @PostMapping("/saveClientAdvert")
-    public String saveClientAdvert(@RequestBody AdvertModel advertModel) {
-        String validationMessage = advertService.validateAdvert(advertModel);
-        if (validationMessage != null) {
-            return validationMessage;
+    public ResponseEntity<String> saveClientAdvert(@RequestBody @Valid AdvertModel advertModel, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            StringBuilder errorMessage = new StringBuilder("İlan kaydedilemedi.\n");
+            bindingResult.getAllErrors().forEach(error -> errorMessage.append(error.getDefaultMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage.toString());
         }
 
         List<AdvertModel> existingAdverts = advertRepository.findByCategoryAndTitleAndDescription(
@@ -44,14 +49,14 @@ public class AdvertController {
         );
 
         if (!existingAdverts.isEmpty()) {
-            advertModel.setStatus("Mükerrer");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Aynı başlık ve açıklamaya sahip başka bir ilan mevcut.");
         } else {
             advertModel.setStatus(advertService.determineStatusByCategory(advertModel.getCategory()));
         }
 
         AdvertModel savedAdvert = advertRepository.save(advertModel);
         advertService.saveStatusChange(savedAdvert.getID(), savedAdvert.getStatus());
-        return "İlan kaydedildi !";
+        return ResponseEntity.ok("İlan kaydedildi !");
     }
 
     @DeleteMapping("/deleteClientAdvert/{id}")
