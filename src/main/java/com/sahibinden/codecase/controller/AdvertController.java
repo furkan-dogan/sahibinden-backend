@@ -44,6 +44,11 @@ public class AdvertController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage.toString());
         }
 
+        String validationMessage = advertService.validateAdvert(advertModel);
+        if (validationMessage != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validationMessage);
+        }
+
         List<AdvertModel> existingAdverts = advertRepository.findByCategoryAndTitleAndDescription(
                 advertModel.getCategory(), advertModel.getTitle(), advertModel.getDescription()
         );

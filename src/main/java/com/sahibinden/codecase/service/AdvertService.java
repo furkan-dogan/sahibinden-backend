@@ -30,6 +30,16 @@ public class AdvertService {
         this.statusChangeRepository = statusChangeRepository;
     }
 
+    public String validateAdvert(AdvertModel advertModel) {
+        String title = advertModel.getTitle();
+
+        if (badWordUtil.containsBadWord(title)) {
+            return "İlan girişi yasaklı kelimeden dolayı engellendi.";
+        }
+
+        return null;
+    }
+
     public String determineStatusByCategory(String category) {
         if ("Emlak".equals(category) || "Vasıta".equals(category) || "Diğer".equals(category)) {
             return STATUS_APPROVAL_PENDING;
