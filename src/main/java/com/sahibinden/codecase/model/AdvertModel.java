@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class CodecaseModel {
+public class AdvertModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int ID;

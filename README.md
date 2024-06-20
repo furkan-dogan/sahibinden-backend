@@ -4,7 +4,35 @@
 
 https://documenter.getpostman.com/view/29702154/2sA3XQhh63
 
-### Docker
+### H2-Database üzerinden uygulamayı çalıştırmak
+
+#### Gereksinimler
+
+* Java 8 veya üzeri sürüm olmalıdır.
+
+* Maven yüklü olmalıdır.
+
+#### Projeyi Başlatmak
+
+Projeyi başlatmak için aşağıdaki komutu kullanın:
+
+`./mvnw spring-boot:run`
+
+Eğer Maven wrapper (mvnw veya mvnw.cmd dosyası) kullanıyorsanız yukarıdaki komutu kullanabilirsiniz. Eğer Maven yüklü değilse, yerine mvn komutunu kullanabilirsiniz.
+
+#### H2 Console'a Erişim
+
+Uygulama başladıktan sonra, tarayıcınızdan http://localhost:8081/h2-console adresine giderek H2 veritabanı konsoluna erişebilirsiniz.
+
+JDBC URL: jdbc:h2:mem:testdb
+
+Username: sa
+
+Password: (boş bırakın)
+
+Bu bilgileri kullanarak H2 konsoluna bağlanabilir ve veritabanı üzerinde işlemler yapabilirsiniz. Postman kullanarak ise kolayca API endpoint'leri kullanabilirsiniz.
+
+### Docker üzerinden uygulamayı çalıştırmak
 
 Bu projeyi çalıştırmak için Docker Desktop veya Docker Engine'in yüklü olması gerekmektedir.
 
@@ -61,4 +89,4 @@ Bir üstteki komut ise, dockerimage adlı Docker image'ından bir container baş
 
 [✓] Uygulamanın containerize edilmesi (Docker)
 
-[ ] Entegrasyon Testleri
+[✓] Bazı Entegrasyon Testleri yapıldı

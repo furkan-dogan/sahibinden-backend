@@ -2,9 +2,9 @@ package com.sahibinden.codecase.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sahibinden.codecase.dto.StatisticsResponse;
-import com.sahibinden.codecase.model.CodecaseModel;
+import com.sahibinden.codecase.model.AdvertModel;
 import com.sahibinden.codecase.model.StatusChange;
-import com.sahibinden.codecase.repository.CodecaseRepository;
+import com.sahibinden.codecase.repository.AdvertRepository;
 import com.sahibinden.codecase.repository.StatusChangeRepository;
 import com.sahibinden.codecase.util.BadWordUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,14 +27,14 @@ import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(CodecaseController.class)
-public class CodecaseControllerTest {
+@WebMvcTest(AdvertController.class)
+public class AdvertControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private CodecaseRepository codecaseRepository;
+    private AdvertRepository advertRepository;
 
     @MockBean
     private BadWordUtil badWordUtil;
@@ -46,7 +46,7 @@ public class CodecaseControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private List<CodecaseModel> codecaseModels;
+    private List<AdvertModel> advertModels;
     private List<StatusChange> statusChanges;
 
 
@@ -57,13 +57,13 @@ public class CodecaseControllerTest {
                 new StatusChange(2, 1, "Deaktif", LocalDateTime.now().plusHours(1))
         );
 
-        codecaseModels = Arrays.asList(
-                new CodecaseModel(1, "Title1", "Description1", "Emlak", "Aktif"),
-                new CodecaseModel(2, "Title2", "Description2", "Vasıta", "Deaktif"),
-                new CodecaseModel(3, "Title3", "Description3", "Diğer", "Mükerrer")
+        advertModels = Arrays.asList(
+                new AdvertModel(1, "Title1", "Description1", "Emlak", "Aktif"),
+                new AdvertModel(2, "Title2", "Description2", "Vasıta", "Deaktif"),
+                new AdvertModel(3, "Title3", "Description3", "Diğer", "Mükerrer")
         );
 
-        when(codecaseRepository.findAll()).thenReturn(codecaseModels);
+        when(advertRepository.findAll()).thenReturn(advertModels);
     }
 
     @Test
@@ -86,13 +86,13 @@ public class CodecaseControllerTest {
 
     @Test
     void saveClientAdvertTest() throws Exception {
-        CodecaseModel newAdvert = new CodecaseModel();
+        AdvertModel newAdvert = new AdvertModel();
         newAdvert.setTitle("ValidTitle");
         newAdvert.setDescription("Valid description with sufficient length");
         newAdvert.setCategory("Emlak");
 
         when(badWordUtil.containsBadWord(any())).thenReturn(false);
-        when(codecaseRepository.save(any(CodecaseModel.class))).thenReturn(newAdvert);
+        when(advertRepository.save(any(AdvertModel.class))).thenReturn(newAdvert);
 
         mockMvc.perform(post("/dashboard/classifieds/saveClientAdvert")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -103,7 +103,7 @@ public class CodecaseControllerTest {
 
     @Test
     void saveClientAdvertWithBadWordTest() throws Exception {
-        CodecaseModel newAdvert = new CodecaseModel();
+        AdvertModel newAdvert = new AdvertModel();
         newAdvert.setTitle("opsiyonluopsiyonlu");
         newAdvert.setDescription("Valid description with sufficient length");
         newAdvert.setCategory("Emlak");
@@ -119,7 +119,7 @@ public class CodecaseControllerTest {
 
     @Test
     void saveClientAdvertWithShortTitleTest() throws Exception {
-        CodecaseModel newAdvert = new CodecaseModel();
+        AdvertModel newAdvert = new AdvertModel();
         newAdvert.setTitle("Short");
         newAdvert.setDescription("ClientAdvertWithShortTitleTest denemesi");
         newAdvert.setCategory("Emlak");
@@ -133,7 +133,7 @@ public class CodecaseControllerTest {
 
     @Test
     void saveClientAdvertWithLongDescriptionTest() throws Exception {
-        CodecaseModel newAdvert = new CodecaseModel();
+        AdvertModel newAdvert = new AdvertModel();
         newAdvert.setTitle("ValidTitle");
         newAdvert.setDescription("Bu açıklama çok uzun ve izin verilen maksimum karakter sınırı olan 200 karakteri aşıyor. Dolayısıyla bu, " +
                 "doğrulamayı tetiklemeli ve bir hata mesajı döndürmelidir. Sınırı aştığından emin olmak için burayı uzatıyorum.");
@@ -149,8 +149,8 @@ public class CodecaseControllerTest {
     @Test
     void deleteClientAdvertTest() throws Exception {
         int advertId = 1;
-        when(codecaseRepository.findById(advertId)).thenReturn(Optional.of(new CodecaseModel()));
-        doNothing().when(codecaseRepository).deleteById(advertId);
+        when(advertRepository.findById(advertId)).thenReturn(Optional.of(new AdvertModel()));
+        doNothing().when(advertRepository).deleteById(advertId);
 
         mockMvc.perform(delete("/dashboard/classifieds/deleteClientAdvert/{id}", advertId))
                 .andExpect(status().isOk())
@@ -160,7 +160,7 @@ public class CodecaseControllerTest {
     @Test
     void deleteClientAdvertNotFoundTest() throws Exception {
         int advertId = 999;
-        when(codecaseRepository.findById(advertId)).thenReturn(Optional.empty());
+        when(advertRepository.findById(advertId)).thenReturn(Optional.empty());
 
         mockMvc.perform(delete("/dashboard/classifieds/deleteClientAdvert/{id}", advertId))
                 .andExpect(status().isOk())
@@ -170,9 +170,9 @@ public class CodecaseControllerTest {
     @Test
     void updateClientAdvertStatusTest() throws Exception {
         int advertId = 1;
-        CodecaseModel advert = new CodecaseModel(1, "Title", "Description", "Emlak", "Onay Bekliyor");
-        when(codecaseRepository.findById(advertId)).thenReturn(Optional.of(advert));
-        when(codecaseRepository.save(any(CodecaseModel.class))).thenReturn(advert);
+        AdvertModel advert = new AdvertModel(1, "Title", "Description", "Emlak", "Onay Bekliyor");
+        when(advertRepository.findById(advertId)).thenReturn(Optional.of(advert));
+        when(advertRepository.save(any(AdvertModel.class))).thenReturn(advert);
 
         mockMvc.perform(put("/dashboard/classifieds/updateClientAdvertStatus/{id}", advertId))
                 .andExpect(status().isOk())
@@ -182,8 +182,8 @@ public class CodecaseControllerTest {
     @Test
     void updateClientAdvertStatusDuplicateTest() throws Exception {
         int advertId = 1;
-        CodecaseModel advert = new CodecaseModel(1, "Title", "Description", "Emlak", "Mükerrer");
-        when(codecaseRepository.findById(advertId)).thenReturn(Optional.of(advert));
+        AdvertModel advert = new AdvertModel(1, "Title", "Description", "Emlak", "Mükerrer");
+        when(advertRepository.findById(advertId)).thenReturn(Optional.of(advert));
 
         mockMvc.perform(put("/dashboard/classifieds/updateClientAdvertStatus/{id}", advertId))
                 .andExpect(status().isOk())
@@ -193,8 +193,8 @@ public class CodecaseControllerTest {
     @Test
     void updateClientAdvertStatusNotPendingTest() throws Exception {
         int advertId = 1;
-        CodecaseModel advert = new CodecaseModel(1, "Title", "Description", "Emlak", "Aktif");
-        when(codecaseRepository.findById(advertId)).thenReturn(Optional.of(advert));
+        AdvertModel advert = new AdvertModel(1, "Title", "Description", "Emlak", "Aktif");
+        when(advertRepository.findById(advertId)).thenReturn(Optional.of(advert));
 
         mockMvc.perform(put("/dashboard/classifieds/updateClientAdvertStatus/{id}", advertId))
                 .andExpect(status().isOk())
@@ -204,7 +204,7 @@ public class CodecaseControllerTest {
     @Test
     void updateClientAdvertStatusNotFoundTest() throws Exception {
         int advertId = 999;
-        when(codecaseRepository.findById(advertId)).thenReturn(Optional.empty());
+        when(advertRepository.findById(advertId)).thenReturn(Optional.empty());
 
         mockMvc.perform(put("/dashboard/classifieds/updateClientAdvertStatus/{id}", advertId))
                 .andExpect(status().isOk())
@@ -214,9 +214,9 @@ public class CodecaseControllerTest {
     @Test
     void deactivateClientAdvertTest() throws Exception {
         int advertId = 1;
-        CodecaseModel advert = new CodecaseModel(1, "Title", "Description", "Emlak", "Aktif");
-        when(codecaseRepository.findById(advertId)).thenReturn(Optional.of(advert));
-        when(codecaseRepository.save(any(CodecaseModel.class))).thenReturn(advert);
+        AdvertModel advert = new AdvertModel(1, "Title", "Description", "Emlak", "Aktif");
+        when(advertRepository.findById(advertId)).thenReturn(Optional.of(advert));
+        when(advertRepository.save(any(AdvertModel.class))).thenReturn(advert);
 
         mockMvc.perform(put("/dashboard/classifieds/deactivateClientAdvert/{id}", advertId))
                 .andExpect(status().isOk())
@@ -226,8 +226,8 @@ public class CodecaseControllerTest {
     @Test
     void deactivateClientAdvertNotActiveTest() throws Exception {
         int advertId = 1;
-        CodecaseModel advert = new CodecaseModel(1, "Title", "Description", "Emlak", "Deaktif");
-        when(codecaseRepository.findById(advertId)).thenReturn(Optional.of(advert));
+        AdvertModel advert = new AdvertModel(1, "Title", "Description", "Emlak", "Deaktif");
+        when(advertRepository.findById(advertId)).thenReturn(Optional.of(advert));
 
         mockMvc.perform(put("/dashboard/classifieds/deactivateClientAdvert/{id}", advertId))
                 .andExpect(status().isOk())
@@ -238,7 +238,7 @@ public class CodecaseControllerTest {
     @Test
     void deactivateClientAdvertNotFoundTest() throws Exception {
         int advertId = 999;
-        when(codecaseRepository.findById(advertId)).thenReturn(Optional.empty());
+        when(advertRepository.findById(advertId)).thenReturn(Optional.empty());
 
         mockMvc.perform(put("/dashboard/classifieds/deactivateClientAdvert/{id}", advertId))
                 .andExpect(status().isOk())
@@ -248,10 +248,10 @@ public class CodecaseControllerTest {
     @Test
     void getStatisticsTest() throws Exception {
         StatisticsResponse statisticsResponse = new StatisticsResponse(3, 2, 1, 1);
-        when(codecaseRepository.countByStatus("Aktif")).thenReturn(3L);
-        when(codecaseRepository.countByStatus("Deaktif")).thenReturn(2L);
-        when(codecaseRepository.countByStatus("Onay Bekliyor")).thenReturn(1L);
-        when(codecaseRepository.countByStatus("Mükerrer")).thenReturn(1L);
+        when(advertRepository.countByStatus("Aktif")).thenReturn(3L);
+        when(advertRepository.countByStatus("Deaktif")).thenReturn(2L);
+        when(advertRepository.countByStatus("Onay Bekliyor")).thenReturn(1L);
+        when(advertRepository.countByStatus("Mükerrer")).thenReturn(1L);
 
         mockMvc.perform(get("/dashboard/classifieds/statistics"))
                 .andExpect(status().isOk())
