@@ -80,13 +80,13 @@ Bir üstteki komut ise, dockerimage adlı Docker image'ından bir container baş
 [✓] Bir ilana ait zamanla oluşan tüm durum değişikliklerini listeleme (**BONUS**)
 
 #### Testler
-[✓] Unit Testler (Kapsam ve oranı geliştiricinin inisiyatifindedir)
+[✓] Bazı Unit Testler (Kapsam ve oranı geliştiricinin inisiyatifindedir)
 
 #### Bonus
-[✓] Swagger/Postman dokümanı hazırlanması
+[✓] Postman dokümanı hazırlanması
 
-[ ] Çalışma süresi 5 milisaniyeden fazla süren isteklerin her defasında loglanması
+[✓] Çalışma süresi 5 milisaniyeden fazla süren isteklerin her defasında loglanması
 
 [✓] Uygulamanın containerize edilmesi (Docker)
 
-[✓] Bazı Entegrasyon Testleri yapıldı
+[✓] "Bazı" Entegrasyon Testleri yapıldı
