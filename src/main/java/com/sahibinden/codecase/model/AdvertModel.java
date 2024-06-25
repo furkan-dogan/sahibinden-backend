@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class AdvertModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int ID;
+    private int id;
 
     @Size(min = 10, max = 50, message = "İlan başlığı en az 10, en fazla 50 karakter olmalıdır.\n")
     @Pattern(regexp = "^[A-Za-z0-9ğüşıöçĞÜŞİÖÇ].*", message = "İlan başlığı harf veya rakam ile başlamalıdır.\n")

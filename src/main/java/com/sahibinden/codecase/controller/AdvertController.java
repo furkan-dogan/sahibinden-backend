@@ -69,7 +69,7 @@ public class AdvertController {
         }
 
         List<AdvertModel> existingAdverts = advertRepository.findByCategoryAndTitleAndDescription(
-                advertModel.getCategory(), advertModel.getTitle(), advertModel.getDescription()
+                    advertModel.getCategory(), advertModel.getTitle(), advertModel.getDescription()
         );
 
         if (!existingAdverts.isEmpty()) {
@@ -79,7 +79,7 @@ public class AdvertController {
         }
 
         AdvertModel savedAdvert = advertRepository.save(advertModel);
-        advertService.saveStatusChange(savedAdvert.getID(), savedAdvert.getStatus());
+        advertService.saveStatusChange(savedAdvert.getId(), savedAdvert.getStatus());
 
         stopWatch.stop();
         advertService.logExecutionTime("/saveClientAdvert", stopWatch.getTotalTimeMillis());
@@ -113,7 +113,7 @@ public class AdvertController {
         String result = advertRepository.findById(id)
                 .map(advert -> {
                     String updateResult = advertService.updateStatusToActive(advert);
-                    advertService.saveStatusChange(advert.getID(), advert.getStatus());
+                    advertService.saveStatusChange(advert.getId(), advert.getStatus());
                     return updateResult;
                 })
                 .orElse("İlan bulunamadı.");
@@ -132,7 +132,7 @@ public class AdvertController {
         String result = advertRepository.findById(id)
                 .map(advert -> {
                     String deactivateResult = advertService.deactivateAdvert(advert);
-                    advertService.saveStatusChange(advert.getID(), advert.getStatus());
+                    advertService.saveStatusChange(advert.getId(), advert.getStatus());
                     return deactivateResult;
                 })
                 .orElse("İlan bulunamadı.");
